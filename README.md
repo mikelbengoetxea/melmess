@@ -18,6 +18,20 @@ $:n(melmess(
   .s("sine")
 ```
 
+
+```js
+let drums = ['cr', 'bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'mt', 'ht'] // index = digit: 1 = kick, 2 = snare, ... 0 = crash
+$:s(melmess(
+   8,  8,  16, // mel: start, len, crowd
+   3,  8,  5, // mask: start, len, thresh
+   2,  3,  1) // emb: shift, emb, twirl
+  .fmap(v => drums[v % drums.length]))
+  .mask("0 1@31 0 1@31")
+  .stack(s("bd ~ sd ~"))
+  .decay(.08)
+  .lpf(3000)
+```
+
 | Row | 1st | 2nd | 3rd |
 |---|---|---|---|
 | mel | start in the pool | number of notes in the melody loop | crowd: slots (notes or rests) per bar |
