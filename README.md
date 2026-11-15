@@ -1,20 +1,13 @@
-# melmess
-
-A digit sequencer for [Strudel](https://strudel.cc). It reads a melody from the digits of pi or e, gates it with a second run of digits, and can fill gaps with embellishment runs.
-
-## Use
+digit sequencer for [Strudel](https://strudel.cc)
 
 Paste `template.js` into a blank project and remove the leading `//` from each line (Ctrl+/ toggles it). The first three lines are:
 
 ```js
 let tonalScale = "C:minor"
 let usePi = false // false = e
-let melmess = (await import('https://cdn.jsdelivr.net/gh/YOURNAME/YOURREPO@main/melmess.js')).make(() => usePi)
+let melmess = (await import('https://cdn.jsdelivr.net/gh/mikelbengoetxea/melmess@main/melmess.js')).make(() => usePi)
 ```
 
-`usePi` and `tonalScale` stay in your project. Flip `usePi` and re-evaluate to switch pools mid-jam. The scale is applied in each voice, so every voice can use its own.
-
-## The call
 
 ```js
 $:n(melmess(
