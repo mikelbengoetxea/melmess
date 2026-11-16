@@ -6,15 +6,13 @@ const ePool  = [2, 7, 1, 8, 2, 8, 1, 8, 2, 8, 4, 5, 9, 0, 4, 5, 2, 3, 5, 3]
 const gcd = (a, b) => b ? gcd(b, a % b) : a
 const lcm = (a, b) => a * b / gcd(a, b)
 
-// getUsePi is a function that returns true (pi) or false (e). It is read every time melmess is called,
-// so toggling usePi in your project and re-evaluating switches the pool. Without it, pi is used.
+// getUsePi is a function that returns true (pi), false (e) or 'alt' (single quotes: one bar of pi, one bar of e, alternating).
+// It is read every time melmess is called, so toggling usePi in your project and re-evaluating switches the pool.
+// Without it, pi is used.
 export const make = (getUsePi = () => true) => {
-  const { silence, timeCat, pure } = globalThis // Strudel's own functions, looked up when make() runs
-  const pick = (start, length) => {
-    let pool = getUsePi() ? piPool : ePool
-    return Array.from({length}, (_, i) => pool[(start + i) % pool.length])
-  }
-  return (ms, ml, crowd, xs, xl, t, shift = 0, emb = 0, twirl = 1) => { // melody start, melody length, crowd = slots (notes or rests) per bar, mess start, mess length, t = threshold (>= t is on), shift = emb shift (moves the embellished gaps along the rank, wraps), emb = embellishment (0 = none, k = the first k gaps in the rank, capped), twirl = notes inserted in each gap (equal spacing in time and pitch)
+  const { silence, timeCat, pure, slowcat } = globalThis // Strudel's own functions, looked up when make() runs
+  const build = (pool, ms, ml, crowd, xs, xl, t, shift, emb, twirl) => { // melody start, melody length, crowd = slots (notes or rests) per bar, mess start, mess length, t = threshold (>= t is on), shift = emb shift (moves the embellished gaps along the rank, wraps), emb = embellishment (0 = none, k = the first k gaps in the rank, capped), twirl = notes inserted in each gap (equal spacing in time and pitch)
+    const pick = (start, length) => Array.from({length}, (_, i) => pool[(start + i) % pool.length])
     let notes = pick(ms, ml)
     let d = pick(xs, xl).map(x => x >= t ? 1 : 0)
     let n = lcm(ml, xl) // slots until melody loop and mask loop line up again
@@ -46,5 +44,12 @@ export const make = (getUsePi = () => true) => {
     })
     if (pos < f * n) out.push([f * n - pos, silence])
     return timeCat(...out).slow(n / crowd)
+  }
+  return (ms, ml, crowd, xs, xl, t, shift = 0, emb = 0, twirl = 1) => {
+    let u = getUsePi()
+    let args = [ms, ml, crowd, xs, xl, t, shift, emb, twirl]
+    return u === 'alt'
+      ? slowcat(build(piPool, ...args), build(ePool, ...args)) // each pool only advances on its own bars
+      : build(u ? piPool : ePool, ...args)
   }
 }
