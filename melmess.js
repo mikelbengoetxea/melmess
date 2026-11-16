@@ -45,11 +45,13 @@ export const make = (getUsePi = () => true) => {
     if (pos < f * n) out.push([f * n - pos, silence])
     return timeCat(...out).slow(n / crowd)
   }
-  return (ms, ml, crowd, xs, xl, t, shift = 0, emb = 0, twirl = 1) => {
+  const dflt = [, , , , , , 0, 0, 1] // defaults for shift, emb, twirl
+  return (...a) => { // any argument can be an array, e.g. [8, 16] = 8 on one bar, 16 on the next, and so on
     let u = getUsePi()
-    let args = [ms, ml, crowd, xs, xl, t, shift, emb, twirl]
-    return u === 'alt'
-      ? slowcat(build(piPool, ...args), build(ePool, ...args)) // each pool only advances on its own bars
-      : build(u ? piPool : ePool, ...args)
+    let args = Array.from({length: 9}, (_, i) => { let x = a[i] === undefined ? dflt[i] : a[i]; return Array.isArray(x) ? x : [x] })
+    let pools = u === 'alt' ? [piPool, ePool] : [u ? piPool : ePool]
+    let total = args.reduce((m, x) => lcm(m, x.length), pools.length) // bars until every alternation lines up again
+    let pats = Array.from({length: total}, (_, i) => build(pools[i % pools.length], ...args.map(x => x[i % x.length])))
+    return pats.length === 1 ? pats[0] : slowcat(...pats) // each pattern only advances on its own bars
   }
 }
